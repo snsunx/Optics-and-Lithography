@@ -1,0 +1,97 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\begin{document}
+
+\title{Fourier Optics}
+\author{Shi-Ning Sun}
+\maketitle
+
+\section{Fourier Transform}
+
+\subsection{Definition}
+
+In optics, the Fourier transform is defined as
+
+\begin{align}
+    G(f_x, f_y) = \mathcal{F}\{g(x, y)\} = \iint g(x, y) e^{-2\pi j(f_x x + f_y y)} dx dy
+\end{align}
+and the inverse Fourier transform is defined as
+\begin{align}
+    g(x, y) = \mathcal{F}^{-1}\{G(f_x, f_y)\} = \iint G(f_x, f_y) e^{2\pi j(f_x x + f_y y)} dx dy
+\end{align} 
+where both integrations extend from $-\infty$ to $\infty$.
+
+\subsection{Common Fourier Transform Pairs}
+
+$$
+\begin{array}{c|c}
+    g(x, y) & G(f_x, f_y) \\
+    \hline
+    e^{-\pi a x^2} & \frac{e^{-\pi f_x^2 / a}}{\sqrt{a}}
+\end{array}
+$$
+
+To verify Fourier transform formulas in Mathematica, we should do
+
+\begin{verbatim}
+FourierTransform[<g>, {x, y}, {fx, fy}, FourierParameters -> {0, -2 Pi}]
+\end{verbatim}
+
+
+\section{Scalar Diffraction}
+
+\subsection{Rayleigh-Sommerfeld Approximation}
+
+By the Rayleigh-Sommerfeld apprxomation, the field on the observation plane is
+
+\begin{align}
+    U_2(x, y) = \frac{z}{j\lambda} \iint U_1(\xi, \eta) \frac{e^{jk\sqrt{z^2 + (x-\xi)^2 + (y-\eta)^2}}}
+    {z^2 + (x-\xi)^2 + (y-\eta)^2} d\xi d\eta
+\end{align}
+
+\subsection{Fresnel Approximation}
+
+When
+\begin{align}
+    z^2 \gg (x-\xi)^2 + (y-\eta)^2
+\end{align}
+we can approximate the exponent using the expression $\sqrt{1 + a} \approx 1 + a/2$ where 
+$a = [(x-\xi)^2 + (y-\eta)^2]/z^2$, and the denominator by $z^2 + (x-\xi)^2 + (y-\eta)^2 \approx z^2$, 
+in which case the expression for the phasor on the observation plane is
+\begin{align}
+    U_2(x, y) = \frac{e^{jkz}}{j\lambda z} \iint U_1(\xi,\eta) e^{j\frac{k}{2z}((x-\xi)^2 + (y-\eta)^2)} d\xi d\eta
+\end{align}
+This expression can be regarded as a convolution $U_2 = U_1 * h$, where $h$ is
+\begin{align}
+    h(x, y) = \frac{e^{jkz}}{j\lambda z} e^{j\frac{k}{2z}(x^2 + y^2)}
+\end{align}
+By the convolution property for Fourier transform, we can calculate $U_2(x, y)$ by
+\begin{align}
+    U_2(x, y) = \mathcal{F}^{-1}\{ \mathcal{F}\{U_1(x, y)\} H(f_x, f_y) \},
+\end{align}
+where $H(f_x, f_y)$ is the transfer function, which is the Fourier transform of $h(x, y)$ and has the expression
+\begin{align}
+    H(f_x, f_y) = e^{jkz} e^{-j\pi\lambda z(f_x^2 + f_y^2)}
+\end{align}
+
+We can also expand the quadratic function on the exponential and pull out the term that do not depend on the intergration variables, in which case
+\begin{align}
+    U_2(x, y) = \frac{e^{jkz}}{j\lambda z} e^{j\frac{k}{2z}(x^2+y^2)} \iint U_1(\xi,\eta) e^{j\frac{k}{2z}(\eta^2+\xi^2)} e^{j\frac{k}{2z}(x\xi + y\eta)} d\xi d\eta
+\end{align}
+This integral can be interpreted as the the Fourier transform of the source field times a chirp function.
+
+\subsection{Fraunhofer Approximation}
+
+In far field $z \gg \xi^2 + \eta^2$, we can approximate the chirp term $e^{j\frac{k}{2z}(\xi^2 + \eta^2)}$ 
+in the Fresnel approximation as unity. The phasor on the observation plane is
+
+\begin{align}
+    U_2(x, y) = \frac{e^{jkz}}{j\lambda z} e^{j\frac{k}{2z}(x^2+y^2)} 
+    \iint U_1(\xi,\eta) e^{-j\frac{2\pi}{\lambda z}(x\xi + y\eta)}d\xi d\eta
+\end{align}
+
+\end{document}

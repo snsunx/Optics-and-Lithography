@@ -1,0 +1,282 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{minted}
+\usepackage{cleveref}
+
+\begin{document}
+
+\title{Signal Processing}
+\author{Shi-Ning Sun}
+\date{\today}
+\maketitle
+
+\section{Linear Time-Invariant Systems}
+
+\subsection{Impulse Response}
+
+Any discrete-time signal can be written as
+\begin{align}
+    x[n] = \sum_{k=-\infty}^\infty x[k]\delta[n-k].
+\end{align}
+
+If the system is linear, the output $y[n]$ can be expressed as
+\begin{align}
+    y[n] = \sum_{k=-\infty}^\infty x[k] h_k[n]
+\end{align}
+where $h_k[n]$ is the response of $\delta[n-k]$.
+
+If the system is further time-invariant, we can write $h_k[n] = h[n - k]$, and the output is
+\begin{align}
+    y[n] = \sum_{k=-\infty}^\infty x[k] h[n-k].
+\end{align}
+
+The function $h[n]$ is called impulse response and completely characterizes the behavior of 
+a linear time-invariant (LTI) system.
+
+\subsection{Complex Exponentials}
+
+The more common way to handle LTI systems is to represent the signals as a linear combinations
+of complex exponentials instead of impulses. The reason is that complex exponentials are 
+eigenfunctions of LTI systems, which implies they only pick up an amplitude change after
+transforming through the system. 
+
+To illustrate this, consider transforming $x(t) = e^{st}$ through an LTI system
+\begin{align}
+    y(t) = \int_{-\infty}^\infty h(\tau) x(t-\tau) d\tau = \int_{-\infty}^\infty h(\tau) e^{s(t-\tau)} d\tau
+    = e^{st} \underbrace{\int_{-\infty}^\infty h(\tau) e^{-s\tau}}_{H(s)} d\tau.
+\end{align}
+Similarly, for a discrete-time signal $x[n] = z^n$,
+\begin{align}
+    y[n] = \sum_{k=-\infty}^\infty h[k] x[n-k] = \sum_{k=-\infty}^\infty h[k] z^{n-k} = z^n 
+    \underbrace{\sum_{k=-\infty}^\infty h[k]z^{-k}}_{H(z)}
+\end{align}
+This transform of the impulse resposne is called the transfer function.
+
+The usefulness of the eigenfunction property of complex exponentials is that, if we represent
+an input signal as a linear combination of complex exponentials, each term in the linear combination
+only picks up an amplitude proportional to the transfer function. Specifically, in continuous time
+\begin{align}
+    x(t) = \sum_k a_k e^{s_kt} \longmapsto y(t) = \sum_k a_k H(s_k) e^{s_kt}
+\end{align}
+and in discrete time
+\begin{align}
+    x[n] = \sum_k a_k z_k^n \longmapsto y[n] = \sum_k a_k H(z) z_k^n. 
+\end{align}
+
+Typically, we will let $s = j\omega$ and $z = e^{j\omega}$, in which case the transform is the Fourier transform in continuous or discrete time. In such case we write
+\begin{align}
+    H(\omega) \equiv H(s = j\omega) = \int_{-\infty}^\infty h(t) e^{-j\omega t} dt.
+\end{align}
+and
+\begin{align}
+    H(\omega) = \equiv H(z = e^{j\omega}) = \sum_{n=\infty}^\infty h[n] e^{-j\omega n}
+\end{align}
+
+
+\section{Fourier Series and Transform}
+
+Periodic signals can be represented as Fourier series, which is a finite sum of complex exponentials.
+Aperiodic signals can also be represented as a sum but the sum is infinite.
+
+\subsection{Continuous-Time Fourier Series}
+
+A continuous-time signal is periodic if for all $t$
+\begin{align}
+    x(t) = x(t + T).
+\end{align}
+
+The Fourier series representation of such a signal is
+\begin{align}
+    a_k &= \frac{1}{T} \int_T x(t) e^{-jk\omega_0t}dt, \label{eq:ctfs_ft}\\
+    x(t) &= \sum_{k=-\infty}^\infty a_k e^{jk\omega_0t}. \label{eq:ctfs_ift}
+\end{align}
+where $\omega_0 = 2\pi/T$.
+
+\subsection{Discrete-Time Fourier Series}
+
+A discrete-time signal is periodic if for all $n$
+\begin{align}
+    x[n] = x[n + N].
+\end{align}
+
+The Fourier series representation of such a signal is
+\begin{align}
+    a_k &= \frac{1}{N} \sum_{n=\langle N\rangle} x[n] e^{-jk(2\pi/N)n}, \\
+    x[n] &= \sum_{k=\langle N\rangle} a_k e^{jk(2\pi/N)n}.
+\end{align}
+
+
+\subsection{Continuous-Time Fourier Transform}
+
+We will write an aperiodic continuous-time signal $x(t)$ as a linear combination of complex exponentials such that
+
+\begin{align}
+    X(\omega) &= \int_{-\infty}^\infty x(t)e^{-j\omega t}dt, \\
+    x(t) &= \frac{1}{2\pi}\int_{-\infty}^\infty X(\omega) e^{j\omega t}d\omega.
+\end{align}
+
+\subsection{Discrete-Time Fourier Transform}
+
+For a discrete-time signal, 
+\begin{align}
+    X(\omega) &= \sum_{n=-\infty}^\infty x[n] e^{-j\omega n},\\
+    x[n] &= \frac{1}{2\pi}\int_{2\pi} X(\omega) e^{j\omega n} d\omega.
+\end{align}
+
+Note that the frequency-domain representation $X(\omega)$ is periodic in $2\pi$. This explains why in the inverse FT we only need to integrate over one period of $2\pi$.
+
+\subsection{Expressions Using Frequency}
+
+In optics and other fields, we use frequency $f$ instead of angular frequency $\omega$. In this case, the continuous-time Fourier transform is
+\begin{align}
+    X(f) &= \int_{-\infty}^\infty x(t)e^{-j 2\pi f t}dt,\\
+    x(t) &= \int_{-\infty}^\infty X(\omega) e^{j 2\pi f t} df.
+\end{align}
+and in discrete time
+\begin{align}
+    X(f) &= \sum_{n=-\infty}^\infty x[n] e^{-j2\pi f n},\\
+    x[n] &= \int_1 X(f) e^{j2\pi f n} df.
+\end{align}
+
+\section{Fast Fourier Transform}
+
+\subsection{Definition}
+
+In numerical calculations, we cannot have infinite data points on the input signals, which means 
+the input signal will need to be restricted both in total time duration and intervals between the 
+individual data points. The discrete Fourier transform is essentially the Fourier series
+representation of discrete-time periodic signals with some modifications:
+\begin{align}
+    y_k = \sum_{m=0}^{n-1} x_m e^{-j2\pi km/n}, \label{eq:y_k} \\
+    x_m = \frac{1}{n} \sum_{k=0}^{n-1} y_k e^{j2\pi km/n}. \label{eq:x_m}
+\end{align}
+This is the same as the definition of Fourier transform from discrete-time Fourier series except by
+moving the coefficient $1/n$ from the inverse FT to FT.
+
+Another way to look at the discrete Fourier transform expressions is by regarding it as a modification
+of the continuous-time Fourier series. Toward that end, we need to redefine the continuous-time Fourier
+series expressions Eqs.~\cref{eq:ctfs_ft,eq:ctfs_ift} to be
+\begin{align}
+    y_k &= \int_T x(t) e^{-j2\pi kt/T}dt, \label{eq:fft_ctfs_ft} \\
+    x(t) &= \frac{1}{T} \sum_{k=-\infty}^\infty y_k e^{j2\pi kt/T}. \label{eq:fft_ctfs_ift}
+\end{align}
+Suppose $x(t)$ is sampled at $m\Delta t$, with $m = 0, ..., n-1$. We can write Eq.~\ref{eq:fft_ctfs_ft}
+as a Riemann sum,
+\begin{align}
+    y_k &= \sum_{m=0}^{n-1} x(m\Delta t) e^{-j2\pi km\Delta t / (n\Delta t)} \Delta t\\
+        &= \underbrace{\Delta t}_{{\tt dt}} \underbrace{\sum_{m=0}^{n-1} x_m e^{-j2\pi km / n}}_{{\tt fft(x)}} \\
+\end{align}
+Therefore, to accurately represent the frequency-domain signal, we need to multiply the output from
+the FFT function {\tt fft(x)} by a correction factor {\tt dt}.
+
+Similarly, on the inverse Fourier transform,
+\begin{align}
+    x_m \equiv x(m\Delta t) &= \frac{1}{T} \sum_{k=-\infty}^\infty y_k e^{j2\pi kt/T}\\
+    &= \underbrace{\frac{1}{\Delta t}}_{{\tt 1/dt}}
+       \underbrace{\left(\frac{1}{n}\sum_{k=0}^{n-1} y_k e^{j2\pi km\Delta t/(n\Delta t)}\right)}_{{\tt ifft(x)}}
+\end{align}
+Hence to accurately represent the time-domain signal, we need to multiply the output from the {\tt ifft}
+function by a correction factor {\tt 1/dt}.
+
+\subsection{Sampling}
+
+A practical issue that arises in numerical calculation is that whether the zero point is at the
+start or in the center of the time or frequency variable range. If we sample the time domain from
+$t = 0$, the samples are at times
+\begin{align}
+    0, \ \Delta t, \ 2\Delta t, \ ..., \ (n-1)\Delta t. \label{eq:normal_order}
+\end{align}
+For other applications, particularly in optics where the variables are in the spatial domain,
+the samples are more likely to locate at (for simplicity we will assume $n$ is even)
+\begin{align}
+    (-n/2)\Delta t, \ (-n/2+1)\Delta t,\ ...,\ 0,\ \Delta t,\ ...,\ (n/2-1)\Delta t.
+\end{align}
+In such cases, we need to first convert the samples to the order in Eq.~\ref{eq:normal_order}
+before passing to the FFT function on a computer.
+
+Similarly, when we get back the returned array of $y_k$ values from the computer, they are in
+the order of
+\begin{align}
+    0, \ \Delta f, \ 2\Delta f, ... \ (n-1)\Delta f.
+\end{align}
+We either want to keep them as they are, or in the case of spatial-domain applications, we need
+to convert them to
+\begin{align}
+    (-n/2)\Delta f, \ (-n/2+1)\Delta f,\ ...,\ 0,\ \Delta f,\ ...,\ (n/2-1)\Delta f.
+\end{align}
+
+\subsection{Code}
+
+In both Python and MATLAB, the functions to perform FFT are very similar. We will first describe
+the code in Python before getting to MATLAB.
+
+\subsubsection{Python}
+
+In Python, FFT can be performed with the {\tt np.fft} module ({\tt numpy} is imported as {\tt np}).
+The {\tt np.fft} and {\tt np.ifft} functions exactly convert between $x_m$ and $y_k$ defined in
+Eq.~\ref{eq:x_m} and Eq.~\ref{eq:y_k}. To resolve the sampling starting point issue, we have two
+solutions: 1. Use {\tt np.fft.fftfreq} as the x-axis when plotting, which returns an {\tt np.ndarray}
+with zero-centered coordinates. 2. Use {\tt np.fft.fftshift} on the output to make the output zero-
+centered. This function can also be used to convert the input from zero-centered to zero-starting.
+
+Suppose we prepared the time points and the time-domain input as follows
+\begin{minted}{python}
+    import numpy as np
+
+    T = <total-time>
+    dt = <time-interval>
+    n = T // dt # assuming n is even
+
+    t = np.arange(0, t, dt)
+    x = <commands-to-obtain-input>
+\end{minted}
+
+If we want to zero-center the output, we can directly obtain the frequencies from {\tt np.fft.fftfreq} by
+\begin{minted}{python}
+    f = np.fft.fftfreq(n, dt)
+    y = np.fft.fft(x)
+\end{minted}
+or if the frequencies are alreay prepared in the normal order, we can do {\tt np.fft.fftshift} on the
+output as
+\begin{minted}{python}
+    f = np.arange(-1/(2*dt), 1/(2*dt), 1/T)
+    y = np.fft.fftshift(np.fft.fft(x))
+\end{minted}
+
+If we don't want to zero-center the output, we can simply create the frequencies as follows and not modify
+the output
+\begin{minted}{python}
+    f = np.arange(0, 1/dt, 1/T)
+    y = np.fft.fft(x)
+\end{minted}
+
+\subsubsection{MATLAB}
+
+In MATLAB, the flow of the code is the same:
+\begin{minted}{matlab}
+    T = <total-time>
+    dt = <time-interval>
+
+    t = 0:dt:T-dt
+    x = <commands-to-obtain-input>
+\end{minted}
+
+MATLAB does not have the {\tt fftfreq} function. If we want to zero-center the output, we can only use
+the {\tt fftshift} function
+\begin{minted}{matlab}
+    f = -1/(2*dt):1/T:1/(2*dt)-1/T
+    y = fftshift(fft(x))
+\end{minted}
+
+If we don't want to zero-center the output, we can simply create the frequencies as follows and not modify
+the output
+\begin{minted}{matlab}
+    f = 0:1/T:1/dt
+    y = fft(x)
+\end{minted}
+
+\end{document}
