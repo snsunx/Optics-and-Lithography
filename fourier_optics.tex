@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
+\usepackage{minted}
 
 \begin{document}
 
@@ -12,10 +13,9 @@
 
 \section{Fourier Transform}
 
-\subsection{Definition}
+\subsection{2D Fourier Transform}
 
 In optics, the Fourier transform is defined as
-
 \begin{align}
     G(f_x, f_y) = \mathcal{F}\{g(x, y)\} = \iint g(x, y) e^{-2\pi j(f_x x + f_y y)} dx dy
 \end{align}
@@ -37,10 +37,27 @@ $$
 
 To verify Fourier transform formulas in Mathematica, we should do
 
-\begin{verbatim}
+\begin{minted}{mathematica}
 FourierTransform[<g>, {x, y}, {fx, fy}, FourierParameters -> {0, -2 Pi}]
-\end{verbatim}
+\end{minted}
 
+\subsection{MATLAB Example}
+
+Typically, to do a 2D Fourier transform in MATLAB, we can use the {\tt fft2} function.
+\begin{minted}{matlab}
+    % Spatial domain
+    x = -L/2:dx:L/2-dx;
+    y = x;
+    [X,Y] = meshgrid(x,y);
+    g = <obtain-g-from-XY>;
+
+    % Frequency domain
+    fx = -1(2*dx):1/L:1/(2*dx)-1/L;
+    fy = fx;
+    g0 = fftshift(g);
+    G0 = fft2(g0)*dx^2; % dx^2 for normalization
+    G = fftshift(G0);
+\end{minted}
 
 \section{Scalar Diffraction}
 
@@ -69,18 +86,25 @@ This expression can be regarded as a convolution $U_2 = U_1 * h$, where $h$ is
 \begin{align}
     h(x, y) = \frac{e^{jkz}}{j\lambda z} e^{j\frac{k}{2z}(x^2 + y^2)}
 \end{align}
-By the convolution property for Fourier transform, we can calculate $U_2(x, y)$ by
+By the convolution property of Fourier transform, we can calculate $U_2(x, y)$ by
 \begin{align}
-    U_2(x, y) = \mathcal{F}^{-1}\{ \mathcal{F}\{U_1(x, y)\} H(f_x, f_y) \},
+    \boxed{ U_2(x, y) = \mathcal{F}^{-1}\{ \mathcal{F}\{U_1(x, y)\} \mathcal{F}\{h(x, y)\} \}. }
 \end{align}
-where $H(f_x, f_y)$ is the transfer function, which is the Fourier transform of $h(x, y)$ and has the expression
+The Fourier transform of $h(x, y)$ has an analytical expression is the transfer function $H(f_x, f_y)$,
+which has the expression
 \begin{align}
     H(f_x, f_y) = e^{jkz} e^{-j\pi\lambda z(f_x^2 + f_y^2)}
 \end{align}
-
-We can also expand the quadratic function on the exponential and pull out the term that do not depend on the intergration variables, in which case
+so the observation plane field can be alternatively calculated as
 \begin{align}
-    U_2(x, y) = \frac{e^{jkz}}{j\lambda z} e^{j\frac{k}{2z}(x^2+y^2)} \iint U_1(\xi,\eta) e^{j\frac{k}{2z}(\eta^2+\xi^2)} e^{j\frac{k}{2z}(x\xi + y\eta)} d\xi d\eta
+    \boxed{ U_2(x, y) = \mathcal{F}^{-1}\{ \mathcal{F}\{U_1(x, y)\} H(f_x, f_y) \}. }
+\end{align}
+
+We can also expand the quadratic function on the exponential and pull out the term that do not
+depend on the intergration variables, in which case
+\begin{align}
+    U_2(x, y) = \frac{e^{jkz}}{j\lambda z} e^{j\frac{k}{2z}(x^2+y^2)} 
+    \iint U_1(\xi,\eta) e^{j\frac{k}{2z}(\eta^2+\xi^2)} e^{j\frac{k}{2z}(x\xi + y\eta)} d\xi d\eta
 \end{align}
 This integral can be interpreted as the the Fourier transform of the source field times a chirp function.
 
@@ -93,5 +117,24 @@ in the Fresnel approximation as unity. The phasor on the observation plane is
     U_2(x, y) = \frac{e^{jkz}}{j\lambda z} e^{j\frac{k}{2z}(x^2+y^2)} 
     \iint U_1(\xi,\eta) e^{-j\frac{2\pi}{\lambda z}(x\xi + y\eta)}d\xi d\eta
 \end{align}
+
+The integral can be regarded as as Fourier transform of the source field with the frequency variables
+\begin{align}
+    f_\xi = \frac{x}{\lambda z}, \ f_\eta = \frac{y}{\lambda z} \iff
+    x = \lambda z f_\xi, \ y = \lambda z f_\eta.
+\end{align}
+In terms of the variables $f_\xi$ and $f_\eta$, we can express it as
+\begin{align}
+    \boxed{ U_2(x=\lambda zf_\xi, y=\lambda zf_\eta) = 
+    \frac{e^{jkz}}{j\lambda z} e^{j\frac{k\lambda^2z}{2}(f_\xi^2+f_\eta^2)}
+    \mathcal{F}\{U_1(x, y)\}. }
+\end{align}
+
+Since in FFT, the range of $f_\xi$ is from $-1/(2\Delta\xi)$ to $1/(2\Delta\xi)$ in step of $1/L$,
+the range of $x$ is a scaled version of $f_\xi$, which is from $-\lambda z / (2\Delta\xi)$ to 
+$\lambda z / (2\Delta \xi)$ in step of $\lambda z/L$.
+
+At the critical sampling condition, $\lambda z/\Delta \xi = L$, which implies the observation plane
+dimension equals to the source plane dimension.
 
 \end{document}
