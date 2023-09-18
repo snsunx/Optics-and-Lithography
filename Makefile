@@ -1,5 +1,12 @@
-LATEX = pdflatex
+PDF = pdflatex
+BIB = bibtex
 FLAGS = -shell-escape
 
 %: %.tex
-	$(LATEX) $(FLAGS) $^
+	$(PDF) $(FLAGS) $<
+	if [ -e $(addsuffix .bib,$@) ]; \
+	then \
+		$(BIB) $@ && \
+		$(PDF) $(FLAGS) $< && \
+		$(PDF) $(FLAGS) $<; \
+	fi
