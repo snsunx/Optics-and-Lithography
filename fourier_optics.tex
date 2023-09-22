@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{revtex4-2}
 
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -60,6 +60,29 @@ Typically, to do a 2D Fourier transform in MATLAB, we can use the {\tt fft2} fun
 \end{minted}
 
 \section{Scalar Diffraction}
+
+\subsection{Optical Field}
+An optical field can be written as
+\begin{align}
+    u(\mathbf{r}, t) = A(\mathbf{r})e^{j(\phi(\mathbf{r}) - \omega t)}
+\end{align}
+For a plane wave, $A(\mathbf{r}) = A$ and $\phi(\mathbf{r}) = \mathbf{k}\cdot \mathbf{r}$. 
+We usually assume the plane wave propagates in the $z$-direction, in which case the expression
+for the field is
+\begin{align}
+    u(\mathbf{r}, t) = A e^{j(kz - \omega t)}
+\end{align}
+
+If the field propagates in a linear medium, it is not necessary to carry the temporal term, in which case we
+can write down the phasor form of the field as
+\begin{align}
+    U(\mathbf{r}) = A(\mathbf{r})e^{j\phi(\mathbf{r})}.
+\end{align}
+Furthermore, if $z$ is the fundamental direction of propagation, then we can write the propagation field as
+\begin{align}
+    U(x, y) = A(x, y)e^{j\phi(x, y)}.
+\end{align}
+
 
 \subsection{Rayleigh-Sommerfeld Approximation}
 
