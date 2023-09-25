@@ -1,0 +1,196 @@
+\documentclass{revtex4-2}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{minted}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+
+\begin{document}
+
+\title{Numerical Algorithms}
+\author{Shi-Ning Sun}
+\maketitle
+
+\section{Special Functions}
+
+This section will introduce the Legendre polynomials used in Gaussian quadrature. This section is based on Sec.~8.2
+of Ref.~\cite{burden_and_faires}.
+
+\subsection{Vector Space of Functions}
+
+Functions form a vector space. We can define linear independence and orthogonality on functions in a similar way as
+we would define on vectors.
+
+\begin{definition}
+    The set of functions $\{\phi_i\}_{i = 0}^n$ is linearly independent on $[a, b]$ if the only solution to
+    \begin{align}
+        c_0 \phi_0(x) + c_1\phi_1(x) + ... + c_n\phi_n(x) = 0, \quad \text{ for all } x \in [a, b]
+    \end{align}
+    is $c_0 = c_1 = ... = c_n = 0$. 
+\end{definition}
+
+By the definition of linear independence, we can see that if we have a set of polynomials $\{\phi_j\}_{j=0}^n$ where
+$\phi_j(x)$ is a polynomial of degree $j$, then the set is linearly independent on any interval.
+
+We can define inner product between two functions on an interval $[a, b]$ as
+\begin{align}
+    \langle \phi_j, \phi_k\rangle = \int_a^b \phi_j(x) \phi_k(x) dx.
+\end{align}
+From this definition, we can define orthogonality and Gram-Schmidt process.
+
+\begin{definition}
+    The set of functions $\{\phi_i\}_{i = 0}^n$ is orthogonal on the interval $[a, b]$ if 
+    \begin{align}
+        \langle \phi_j, \phi_k\rangle = \alpha_j \delta_{jk}.
+    \end{align}
+    If in addition $\alpha_j = 1$ for each $j = 0, 1, ..., n$, the set is orthonormal.
+\end{definition}
+
+If $\{\phi_j\}_{j=0}^n$ is an orthogonal set of functions on the interval $[a, b]$. The least squares approximation
+of this set of functions to the function $f(x)$ on $[a, b]$ is
+\begin{align}
+    P(x) = \sum_{j=0}^n \frac{\langle\phi_j, f\rangle}{\langle\phi_j, \phi_j\rangle} \phi_j(x)
+\end{align}
+
+\subsection{Legendre Polynomials}
+
+The Legendre polynomials are defined in a special way as in the following theorem:
+
+\begin{theorem} \label{thm:legendre}
+    Consider the set of polynomials $\{\phi_j\}_{j=0}^n$ where 
+    \begin{align}
+        \phi_0(x) = 1, \quad \phi_1(x) = x
+    \end{align}
+    and for $k\geq 2$
+    \begin{align}
+        \phi_k(x) = (x - B_k)\phi_{k-1}(x) - C_k\phi_{k-2}(x)
+    \end{align}
+    where
+    \begin{align}
+        B_k = \frac{\langle x\phi_{k-1}, \phi_{k-1}\rangle}{\langle\phi_{k-1}, \phi_{k-1}\rangle}, \\
+        C_k = \frac{\langle x\phi_{k-2}, \phi_{k-1}\rangle}{\langle\phi_{k-2}, \phi_{k-2}\rangle}.
+    \end{align}
+    This set of polynomials is called the Legendre polynomials when the interval is restricted to $[-1, 1]$.
+\end{theorem}
+
+We can show that the Legendre polynomials satisfy the property that for any polynomial $Q(x)$ of degree $k < n$,
+the inner product $\langle \phi_n, Q \rangle = 0$.
+
+
+\section{Interpolation}
+
+Algebraic polynomials of degree $n$ have the generic form \cite{burden_and_faires}
+\begin{align}
+    P_n(x) = a_n x^n + a_{n-1} x^{n-1} + ... + a_1 x + a_0.
+\end{align}
+
+The Lagrange interpolating polynomial is a polynomial that passes through $(x_0, f(x_0)), ..., (x_n, f(x_n))$ and can
+be written as
+\begin{align}
+    p(x) = \sum_{k=0}^n f(x_k) L_k(x) = \sum_{k=0}^n f(x_k) \prod_{\substack{i=0\\i\neq k}}^n \frac{x - x_i}{x_k - x_i}
+\end{align}
+
+
+\section{Integration}
+
+\subsection{Newton-Cotes Formula}
+
+Numerical quadrature uses a sum $\sum_{i=0}^n a_i f(x_i)$ to approximate the integral $\int_a^b f(x) dx$ where the 
+points $\{x_0, ..., x_n\}$ all lie in $[a, b]$. In practice, the interval $[a, b]$ is assumed to be small and the 
+integral over a long interval is computed by applying the rule repeatedly to the subdivided intervals.
+
+The Newton-Cotes formula selects the intermediate points $x_i = a + ih, i = 0, ..., n$ where $h = (b - a) / n$ and 
+uses the Lagrange polynomial that passes through the points $\{x_0, ..., x_n\}$ to
+approximate $f(x)$, i.e.
+\begin{align}
+    f(x) \approx P_n(x) = \sum_{i=0}^n f(x_i) L_i(x)
+\end{align}
+so the integral $\int_a^b f(x) dx$ is approximated by the integral of the Lagrange interpolating polynomial over the
+same interval
+\begin{align}
+    \int_a^b f(x) dx \approx \int_a^b P_n(x) dx = \sum_{i=0}^n f(x_i) \underbrace{\int_a^b L_{n, i}(x) dx}_{a_i} 
+    \equiv \sum_{i=0}^n a_i f(x_i).
+\end{align}
+Because the Newton-Cotes formula is based on the Lagrange polynomials, it is exact when approximating the integral of
+any polynomial of degree $\leq n$.
+
+\subsection{The Trapezoidal Rule and Simpson's Rule}
+
+The trapezoidal rule and Simpson's rule are special cases of the Newton-Cotes formula. The trapezoidal rule uses 
+first-order Lagrange polynomials as the interpolating polynomials. To derive the trapezoidal rule, let 
+$x_0 = a, x_1 = b, h = b - a$. The first-order Lagrange polynomial is
+\begin{align}
+    P_1(x) = \frac{x - x_1}{x_0 - x_1} f(x_0) + \frac{x - x_0}{x_1 - x_0} f(x_1).
+\end{align}
+Then the integral is approximated as
+\begin{align}
+    \int_a^b f(x) dx \approx f(x_0)\int_{x_0}^{x_0+h}\frac{x-x_0}{-h} dx + 
+    f(x_1)\int_{x_0}^{x_0+h} \frac{x-(x_0+h)}{h} dx = \frac{h}{2}[f(x_0) + f(x_1)].
+\end{align}
+
+Simpson's rule uses second-order Lagrange polynomials as the interpolating polynomials. To drive Simpson's rule, let
+$x_0 = a, x_1 = a + (b - a)/2, x_2 = b, h = (b - a) / 2$. The second-order Lagrange polynomial is
+\begin{align}
+    P_2(x) = \frac{(x-x_1)(x-x_2)}{(x_0-x_1)(x_0-x_2)} + \frac{(x-x_0)(x-x_2)}{(x_1-x_0)(x_1-x_2)} 
+    + \frac{(x-x_0)(x-x_1)}{(x_2-x_0)(x_2-x_1)}.
+\end{align}
+Then the integral is approximated as
+\begin{align}
+    \int_a^b f(x) dx &\approx f(x_0) \int_{x_0}^{x_0+2h} \frac{[x - (x_0 + h)][x - (x_0 + 2h)]}{(-h)(-2h)} dx 
+    + f(x_1) \int_{x_0}^{x_0+2h} \frac{(x - x_0)[x - (x_0 + 2h)]}{h(-h)} dx \\
+    & + f(x_2) \int_{x_0}^{x_0+2h} \frac{(x - x_0)[x - (x_0 + h)]}{h(2h)} dx \\
+    &= \frac{h}{3}[f(x_0) + 4f(x_1) + f(x_2)]
+\end{align}
+
+\subsection{Gaussian Quadrature}
+
+This section is based on Sec.~4.7 of Ref.~\cite{burden_and_faires}. The Newton-Cotes formula chooses the interpolation
+points to be equally spaced within the interval $[a, b]$, but we can choose the points in a more optimal way as the
+roots of the $n$th-order Legendre polynomial $P_n(x)$. We can use special properties of the Legendre polynomial to
+integrate a function from $-1$ to 1, as shown in the following theorem.
+
+\begin{theorem} (Gaussian Quadrature)
+    Let $\{x_i\}_{i=1}^n$ be the roots of the $n$th Legendre polynomial. Define the Lagrange polynomial over these
+    roots as
+    \begin{align}
+        L_i(x) = \prod_{\substack{j = 1\\ j \neq i}}^n \frac{x - x_j}{x_i - x_j}
+    \end{align}
+    Define the numbers $c_i$ as
+    \begin{align}
+        c_i = \int_{-1}^1 L_i(x) dx
+    \end{align}
+    If $P(x)$ is a polynomial of degree less than $2n$, then
+    \begin{align}
+        \int_{-1}^1 P(x) dx = \sum_{i=1}^n c_i P(x_i).
+    \end{align}
+\end{theorem}
+
+To prove this theorem, note that if a polynomial is of degree $< n$, it is already exactly reproduced by the Lagrange
+interpolating polynomial. If a polynomial is of degree $\geq n$ and $< 2n$, we can factorize the polynomial as
+\begin{align}
+    P(x) = Q(x) P_n(x) + R(x),
+\end{align}
+where $R(x)$ is of degree $< n$. Then we have
+\begin{align}
+    \int_{-1}^1 P(x) dx = \int_{-1}^1 [Q(x)P_n(x) + R(x)] dx \stackrel{*}{=} \int_{-1}^1 R(x) dx
+                        = \sum_{i=1}^n c_i R(x_i) \stackrel{\star}{=} \sum_{i=1}^n c_i P(x_i)
+\end{align}
+where the $*$ equality is due to the orthogonality property of Legendre polynomials and the $\star$ equality is due to
+$\{x_i\}_{i=1}^n$ being the roots of the Legendre polynomial $P_n(x)$. 
+
+To compute the integral $\int_a^b f(x) dx$ over an arbitrary interval $[a, b]$, we need to make a change of variable
+$x = u(t)$ so that $u(-1) = a$ and $u(1) = b$. We can choose the linear function $x = u(t) = (b-a)t/2 + (b+a)/2$. The
+integral can then be written as
+\begin{align}
+    \int_a^b f(x) dx = \int_{-1}^1 f(u(t))\ d u(t) 
+                     = \frac{b - a}{2} \int_{-1}^1 f\left(\frac{b-a}{2} t + \frac{b + a}{2}\right) dt.
+\end{align}
+
+\bibliography{numerical_algorithms}
+
+\end{document}
